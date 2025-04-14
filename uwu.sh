@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.1.3
+# Version:      0.1.4
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -375,7 +375,6 @@ get_slack_webhook () {
 post_to_slack () {
   get_slack_webhook
   if [ ! -z "${slack['webhook']}" ]; then
-    install_package "curl"
     execute_command "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"${slack['message']}\"}' ${slack['webhook']}"
   else
     warning_message "No slack webhook given"
@@ -423,7 +422,7 @@ check_ups_status () {
       post_to_slack
     fi
   fi
-  if [ "${script['endpoint']}" = "console" ]; then
+  if [ "${script['endpoint']}" = "console" ] || [ "${options['verbose']}" = "true" ]; then
     print_message "${message}" "verbose"
   fi
 }
@@ -557,7 +556,7 @@ get_mode () {
 # Check environment
 
 check_environment () {
-  for package in nut nut-client nut-server; do
+  for package in nut nut-client nut-server curl; do
     install_package "${package}"
   done
   get_mode
@@ -704,6 +703,11 @@ while test $# -gt 0; do
     --mode)                           # switch - Nuts mode
       check_value "$1" "$2"
       new["mode"]="$2"
+      shift 2
+      ;;
+    --name)                           # switch - UPS name
+      check_value "$1" "$2"
+      ups["name"]="$2"
       shift 2
       ;;
     --strict)                         # switch - Enable strict mode

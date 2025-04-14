@@ -3,12 +3,12 @@
 UWU
 ----
 
-Ubuntu Working/Monitoring Ups
+Ubuntu Working/Monitoring UPS
 
 Version
 -------
 
-Current version: 0.1.3
+Current version: 0.1.4
 
 Introduction
 ------------
@@ -98,6 +98,18 @@ Post battery status to slack if it not 100:
 ./uwu.sh --action slackalert --param battery.charge --value 100
 ```
 
+Example cron entry:
+
+```
+*/5 * * * * /home/user/bin/ups_check.sh
+```
+
+Example script:
+
+```
+#!/usr/bin/bash
+/home/sysadmin/bin/uwu.sh --action slackalert --param battery.charge --value 100 --location "Workshop" --options verbose
+```
 
 Usage Information
 -----------------
@@ -129,6 +141,8 @@ switch(s):
     Location to prefix message with
 --mode)
     Nuts mode
+--name)
+    UPS name
 --strict)
     Enable strict mode
 --verbose)
