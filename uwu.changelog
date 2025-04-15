@@ -34,3 +34,5 @@
 # Fixed print defaults
 # 0.1.8: Tue Apr 15 09:57:16 PM AEST 2025
 # Fixed bugs
+# 0.1.9: Wed Apr 16 08:13:21 AEST 2025
+# Fixed logic on value checks

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.1.8
+# Version:      0.1.9
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -440,7 +440,7 @@ check_ups_status () {
   fi
   if [ "${options['less']}" = "true" ]; then
     print_message "${ups['value']} is less than ${ups['status']}" "test"
-    if [ "${ups['value']}" < "${ups['status']}" ]; then
+    if [ ${ups['value']} -lt ${ups['status']} ]; then
       string="greater than"
       result="true"
     else
@@ -451,7 +451,7 @@ check_ups_status () {
   if [ "${options['greater']}" = "true" ]; then
     string="greater than"
     print_message "${ups['value']} is greater than ${ups['status']}" "test"
-    if [ "${ups['value']}" > "${ups['status']}" ]; then
+    if [ ${ups['value']} -gt ${ups['status']} ]; then
       string="greater than"
       result="true"
     else
