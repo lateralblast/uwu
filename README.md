@@ -8,7 +8,7 @@ Ubuntu Working/Monitoring UPS
 Version
 -------
 
-Current version: 0.1.5
+Current version: 0.1.8
 
 Introduction
 ------------
@@ -152,6 +152,12 @@ Post battery status to slack if it not 100:
 ./uwu.sh --action slackalert --param battery.charge --value 100
 ```
 
+Post battery status to slack if it is less than 90:
+
+```
+./uwu.sh --action slackalert --param battery.charge --less --value 90
+```
+
 Example cron entry:
 
 ```
@@ -185,24 +191,26 @@ switch(s):
     UPS description
 --driver)
     UPS driver
+--dryrun)
+    Enable dryrun mode
 --endpoint)
     Post endpoint
+--equal*)
+    Equal to check
 --force)
     Enable force mode
+--greater*)
+    Greater than check
 --hostname)
     Nuts mode
+--less*)
+    Less than check
 --location)
     Location to prefix message with
 --mode)
     Nuts mode
 --name)
     UPS name
---strict)
-    Enable strict mode
---verbose)
-    Enable verbos e mode
---version|-V)
-    Print version information
 --option*)
     Action to perform
 --param)
@@ -211,10 +219,18 @@ switch(s):
     UPS port
 --productid)
     UPS product
+--strict)
+    Enable strict mode
+--test)
+    Enable test mode
 --usage*)
     Action to perform
 --value)
     UPS value to check
+--verbose)
+    Enable verbose mode
+--version|-V)
+    Print version information
 --webhook|--slackwebhook)
     Slack webhook
 --webhookfile|--slackwebhookfile)
@@ -258,7 +274,7 @@ postupsstatus|poststatus)
     Post UPS status
 printenv*)
     Print environment
-printdefaults)
+printdefaults|defaults)
     Print defaults
 setmode)
     Set nut mode
@@ -279,22 +295,28 @@ Usage: uwu.sh --option [value]
 
 option(s):
 ---------
-yes (default = false#option)
+yes (default = "false"#option)
    Answer yes to all questions
-test (default = false#option)
+test (default = "false"#option)
    Run in test mode
-debug (default = false#option)
+debug (default = "false"#option)
    Run in debug mode
-force (default = false#option)
+force (default = "false"#option)
    Force action
-print (default = false#option)
+print (default = "false"#option)
    Print to console
-strict (default = false#option)
+strict (default = "false"#option)
    Run is strict mode
-dryrun (default = false#option)
+dryrun (default = "false"#option)
    Run in dryrun mode
-verbose (default = false#option)
+verbose (default = "false"#option)
    Run in verbose mode
-masked (default = false#option)
+masked (default = "false"#option)
    Mask sensitive information in console output where possible
+less (default = "false"#option)
+   Less than check
+greater (default = "false"#option)
+   Greater than check
+equal (default = "false"#option)
+   Equal to check
 ```

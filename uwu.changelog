@@ -28,3 +28,9 @@
 # Added name switch and updated documentation
 # 0.1.5: Tue 15 Apr 2025 15:55:11 AEST
 # Updated slackalert message creation and documentation
+# 0.1.6: Tue 15 Apr 2025 20:09:14 AEST
+# Added greater and less than functions
+# 0.1.7: Tue 15 Apr 2025 21:06:22 AEST
+# Fixed print defaults
+# 0.1.8: Tue Apr 15 09:57:16 PM AEST 2025
+# Fixed bugs

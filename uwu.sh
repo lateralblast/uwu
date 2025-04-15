@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.1.5
+# Version:      0.1.8
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -29,7 +29,6 @@ declare -A ups
 declare -A slack 
 declare -A script
 declare -A options 
-declare -A defaults 
 declare -a option_flags
 declare -a action_flags
 
@@ -64,17 +63,20 @@ set_defaults () {
   script['location']=""
   script['workdir']="$HOME/.${script['name']}"
   slack['webhookfile']="${script['workdir']}/slackwebhook"
-  options["yes"]="false"      # option - Answer yes to all questions
-  options["test"]="false"     # option - Run in test mode
-  options["debug"]="false"    # option - Run in debug mode
-  options["force"]="false"    # option - Force action
-  options["print"]="false"    # option - Print to console
-  options["strict"]="false"   # option - Run is strict mode
-  options["dryrun"]="false"   # option - Run in dryrun mode
-  options["verbose"]="false"  # option - Run in verbose mode
-  options["masked"]="false"   # option - Mask sensitive information in console output where possible
-  options["actions"]="false"  
-  options["options"]="false"  
+  options['yes']="false"          # option - Answer yes to all questions
+  options['test']="false"         # option - Run in test mode
+  options['debug']="false"        # option - Run in debug mode
+  options['force']="false"        # option - Force action
+  options['print']="false"        # option - Print to console
+  options['strict']="false"       # option - Run is strict mode
+  options['dryrun']="false"       # option - Run in dryrun mode
+  options['verbose']="false"      # option - Run in verbose mode
+  options['masked']="false"       # option - Mask sensitive information in console output where possible
+  options['less']="false"         # option - Less than check 
+  options['greater']="false"      # option - Greater than check 
+  options['equal']="false"        # option - Equal to check
+  options['actions']="false"  
+  options['options']="false"  
   os['name']=$( uname -s )
   if [ "${os['name']}" = "Linux" ]; then
     os['distro']=$( lsb_release -i -s 2> /dev/null )
@@ -101,7 +103,11 @@ print_message () {
           format="${format^}"
         else
           if [[ "${format}" =~ t$ ]]; then
-            format="${format^}ting"
+            if [ "${format}" = "test" ]; then
+              format="${format}ing"
+            else
+              format="${format^}ting"
+            fi
           else
             if [[ "${format}" =~ e$ ]]; then
               if [[ ! "${format}" =~ otice ]]; then
@@ -145,7 +151,7 @@ execute_message () {
 # Enable verbose mode
 
 if [[ "${script['args']}" =~ "verbose" ]]; then
-  options["verbose"]="true"
+  options['verbose']="true"
   print_message "verbose to true" "set"
 fi
 
@@ -236,6 +242,7 @@ execute_command () {
   if [ "${options['dryrun']}" = "false" ] || [[ "${privilege}" =~ nodryrun ]]; then
     script['output']=$( eval ${command} )
   fi
+  privilege=""
 }
 
 # Function: print_info
@@ -255,9 +262,9 @@ print_info () {
         IFS='-' read -r param desc <<< "${line}"
         IFS=']' read -r param default <<< ${param}
         IFS='[' read -r _ param <<< ${param}
-        param="${param//\"/}"
+        param="${param//\'/}"
         IFS='=' read -r _ default <<< ${default}
-        default="${default//\"/}"
+        default="${default//\'/}"
         default="${default// /}"
         param="${param} (default = ${default})"
       else
@@ -375,6 +382,7 @@ get_slack_webhook () {
 post_to_slack () {
   get_slack_webhook
   if [ ! -z "${slack['webhook']}" ]; then
+    :
     execute_command "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"${slack['message']}\"}' ${slack['webhook']}"
   else
     warning_message "No slack webhook given"
@@ -420,10 +428,41 @@ post_ups_status () {
 
 check_ups_status () {
   get_ups_status
-  if [ "${ups['status']}" = "${ups['value']}" ]; then
-    message="OK ${ups['param']} is ${ups['value']}"
+  result="" 
+  if [ "${options['equal']}" = "true" ]; then
+    string="equal to"
+    print_message "${ups['value']} is equal to ${ups['status']}" "test"
+    if [ "${ups['value']}" = "${ups['status']}" ]; then
+      result="true"
+    else
+      result="false"
+    fi
+  fi
+  if [ "${options['less']}" = "true" ]; then
+    print_message "${ups['value']} is less than ${ups['status']}" "test"
+    if [ "${ups['value']}" < "${ups['status']}" ]; then
+      string="greater than"
+      result="true"
+    else
+      string="less than"
+      result="false"
+    fi
+  fi
+  if [ "${options['greater']}" = "true" ]; then
+    string="greater than"
+    print_message "${ups['value']} is greater than ${ups['status']}" "test"
+    if [ "${ups['value']}" > "${ups['status']}" ]; then
+      string="greater than"
+      result="true"
+    else
+      string="less than"
+      result="false"
+    fi
+  fi
+  if [ "${result}" = "true" ]; then
+    message="OK ${ups['param']} is ${string} ${ups['value']}"
   else
-    message="ERROR ${ups['param']} is not ${ups['value']}"
+    message="ERROR ${ups['param']} is not ${string} ${ups['value']}"
     if [ "${script['endpoint']}" = "slack" ]; then
       populate_slack_message
       slack['message']="${slack['message']} ${message}"
@@ -453,9 +492,9 @@ print_environment () {
 
 print_defaults () {
   echo "Defaults:"
-  for default in "${!defaults[@]}"; do
-    value="${defaults[${default}]}"
-    echo -e "Default ${default}\tis set to ${value}"
+  for default in "${!options[@]}"; do
+    value="${options[${default}]}"
+    echo -e "Option ${default}\tis set to ${value}"
   done
 }
 
@@ -582,7 +621,7 @@ process_options () {
   else
     value="true"
   fi
-  options["${option_flag}"]="true"
+  options[${option_flag}]="true"
   print_message "${option_flag} to ${value}" "set"
 }
 
@@ -639,7 +678,7 @@ process_actions () {
       print_environment
       exit
       ;;
-    printdefaults)                  # action - Print defaults
+    printdefaults|defaults)         # action - Print defaults
       print_defaults
       exit
       ;;
@@ -672,84 +711,103 @@ while test $# -gt 0; do
     --action*)                        # switch - Action to perform
       check_value "$1" "$2"
       action_flags+=("$2")
-      options["actions"]="true"
+      options['actions']="true"
       shift 2
       ;;
     --debug)                          # switch - Enable debug mode
-      options["debug"]="true"
+      options['debug']="true"
       shift
       ;;
     --desc)                           # switch - UPS description
       check_value "$1" "$2"
-      ups["desc"]="$2"
+      ups['desc']="$2"
       shift 2
       ;;
     --driver)                         # switch - UPS driver
       check_value "$1" "$2"
-      ups["driver"]="$2"
+      ups['driver']="$2"
       shift 2
+      ;;
+    --dryrun)                         # switch - Enable dryrun mode
+      options['dryrun']="true"
+      shift
       ;;
     --endpoint)                       # switch - Post endpoint
       check_value "$1" "$2"
-      script["endpoint"]="$2"
+      script['endpoint']="$2"
       shift 2
       ;;
+    --equal*)                          # switch - Equal to check
+      options['less']="false"
+      options['greater']="fale"
+      options['equal']="true"
+      shift
+      ;;
     --force)                          # switch - Enable force mode
-      options["force"]="true"
+      options['force']="true"
+      shift
+      ;;
+    --greater*)                        # switch - Greater than check
+      echo "got here"
+      options['equal']="false"
+      options['less']="fale"
+      options['greater']="true"
       shift
       ;;
     --hostname)                       # switch - Nuts mode
       check_value "$1" "$2"
-      nut["hostname"]="$2"
+      nut['hostname']="$2"
       shift 2
+      ;;
+    --less*)                          # switch - Less than check
+      options['equal']="false"
+      options['greater']="false"
+      options['less']="true"
+      shift
       ;;
     --location)                       # switch - Location to prefix message with
       check_value "$1" "$2"
-      script["location"]="$2"
+      script['location']="$2"
       shift 2
       ;;
     --mode)                           # switch - Nuts mode
       check_value "$1" "$2"
-      new["mode"]="$2"
+      new['mode']="$2"
       shift 2
       ;;
     --name)                           # switch - UPS name
       check_value "$1" "$2"
-      ups["name"]="$2"
+      ups['name']="$2"
       shift 2
-      ;;
-    --strict)                         # switch - Enable strict mode
-      options["strict"]="true"
-      shift
-      ;;
-    --verbose)                        # switch - Enable verbos e mode
-      options["verbose"]="true"
-      shift
-      ;;
-    --version|-V)                     # switch - Print version information
-      print_version
-      exit
       ;;
     --option*)                        # switch - Action to perform
       check_value "$1" "$2"
       option_flags+=("$2")
-      options["options"]="true"
+      options['options']="true"
       shift 2
       ;;
     --param)                          # switch - UPS param to get
       check_value "$1" "$2"
-      ups["param"]="$2"
+      ups['param']="$2"
       shift 2
       ;;
     --port)                           # switch - UPS port
       check_value "$1" "$2"
-      ups["port"]="$2"
+      ups['port']="$2"
       shift 2
       ;;
     --productid)                      # switch - UPS product
       check_value "$1" "$2"
-      ups["productid"]="$2"
+      ups['productid']="$2"
       shift 2
+      ;;
+    --strict)                         # switch - Enable strict mode
+      options['strict']="true"
+      shift
+      ;;
+    --test)                          # switch - Enable test mode
+      options['test']="true"
+      shift
       ;;
     --usage*)                         # switch - Action to perform
       check_value "$1" "$2"
@@ -760,17 +818,25 @@ while test $# -gt 0; do
       ;;
     --value)                          # switch - UPS value to check
       check_value "$1" "$2"
-      ups["value"]="$2"
+      ups['value']="$2"
       shift 2
+      ;;
+    --verbose)                        # switch - Enable verbose mode
+      options['verbose']="true"
+      shift
+      ;;
+    --version|-V)                     # switch - Print version information
+      print_version
+      exit
       ;;
     --webhook|--slackwebhook)         # switch - Slack webhook
       check_value "$1" "$2"
-      slack["webhook"]="$2"
+      slack['webhook']="$2"
       shift 2
       ;;
     --webhookfile|--slackwebhookfile) # switch - Slack webhook file
       check_value "$1" "$2"
-      slack["webhookfile"]="$2"
+      slack['webhookfile']="$2"
       shift 2
       ;;
     --help|-h)                        # switch - Print help information
@@ -803,6 +869,9 @@ if [ "${options['options']}" = "true" ]; then
       process_options "${option_flag}"
     fi
   done
+  if [ "$options['equal']" = "false" ] && [ "$options['less']" = "false" ] && [ "$options['greater']" = "false" ]; then
+    options['equal']="true"
+  fi
 fi
 
 # Reset defaults based on switches
