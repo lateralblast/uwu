@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.1.4
+# Version:      0.1.5
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -381,6 +381,23 @@ post_to_slack () {
   fi
 }
 
+# Function: populate_slack_message
+#
+# Populate slack message
+
+populate_slack_message () {
+  if [ ! -z "${script['location']}" ]; then
+    slack['message']="${script['location']} ${slack['message']}"
+  fi
+  if [ ! -z "${slack['prefix']}" ]; then
+    slack['message']="${slack['prefix']} ${slack['message']}"
+  fi
+  if [ -z "${ups['param']}" ]; then
+    slack['message']="${slack['message']} ${ups['status']}"
+  else
+    slack['message']="${slack['message']} ${ups['param']} ${ups['status']}"
+  fi 
+}
 
 # Function: post_ups_status
 #
@@ -392,17 +409,7 @@ post_ups_status () {
     if [ -z "${slack['message']}" ]; then
       slack['message']="UPS status:"
     fi
-    if [ ! -z "${script['location']}" ]; then
-      slack['message']="${script['location']}"
-    fi
-    if [ ! -z "${slack['prefix']}" ]; then
-      slack['message']="${slack['prefix']} ${slack['message']}"
-    fi
-    if [ -z "${ups['param']}" ]; then
-      slack['message']="${slack['message']} ${ups['status']}"
-    else
-      slack['message']="${slack['message']} ${ups['param']} ${ups['status']}"
-    fi
+    populate_slack_message
     post_to_slack
   fi
 }
@@ -418,7 +425,8 @@ check_ups_status () {
   else
     message="ERROR ${ups['param']} is not ${ups['value']}"
     if [ "${script['endpoint']}" = "slack" ]; then
-      slack['message']="${message}"
+      populate_slack_message
+      slack['message']="${slack['message']} ${message}"
       post_to_slack
     fi
   fi

@@ -26,3 +26,5 @@
 # Formating improvements
 # 0.1.4: Mon Apr 14 22:33:08 AEST 2025
 # Added name switch and updated documentation
+# 0.1.5: Tue 15 Apr 2025 15:55:11 AEST
+# Updated slackalert message creation and documentation

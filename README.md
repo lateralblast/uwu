@@ -8,7 +8,7 @@ Ubuntu Working/Monitoring UPS
 Version
 -------
 
-Current version: 0.1.4
+Current version: 0.1.5
 
 Introduction
 ------------
@@ -17,8 +17,62 @@ This is intended to provide a template for configuring UPS monitoring on Ubuntu.
 
 It was driven out of the CyberUPS monitoring software not reliably triggering,
 and wanting something more lightweight than a fully configured nut installation.
-It uses the the uspc command to get values from the UPS and act on then.
+It uses the the uspc command from the NUT package to get values from the UPS and act on then.
 It can be run from cron or similar to check the status, e.g. every 5 or 10mins.
+
+Requirements
+------------
+
+NUT (Network UPS Tools) is required.
+
+Installing on Ubuntu:
+
+```
+sudo apt update
+sudo apt install nut nut-server nut-client
+```
+
+You can search for USB based UPSes, using a number of methods. using the nut-scanner tool, or lsusb.
+
+
+```
+sudo nut-scanner -U
+```
+
+I found this did not work and had to run lsbusb to get the required information:
+
+```
+lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 0764:0501 Cyber Power System, Inc. CP1500 AVR UPS
+Bus 001 Device 003: ID 0781:5583 SanDisk Corp. Ultra Fit
+Bus 001 Device 004: ID 8087:0a2b Intel Corp. Bluetooth wireless interface
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+```
+
+I then added this intomation to /etc/nut/ups.conf:
+
+```
+[cps]
+  driver = usbhid-ups
+  port = auto
+  productid = 0501
+  desc = “Cyber Power System, Inc. CP1500 AVR UPS”
+```
+
+Currently this script runs on the machine the UPS is attached to, so I run the NUT server in standalone mode.
+This is done by adding/changing the MODE entry in /etc/nut/nut.conf:
+
+```
+MODE=standalone
+```
+
+This can be tested by using upsc manually:
+
+```
+$ upsc cps battery.charge
+94
+```
 
 Features
 --------
