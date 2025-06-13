@@ -90,6 +90,10 @@ $ cat ~/.uwu/slackwebhook
 https://hooks.slack.com/services/XXXXXX/XXXXXX/XXXXXXXXX
 ```
 
+Example slack message:
+
+![Slack Message](https://raw.githubusercontent.com/lateralblast/uwu/master/slack.png)
+
 Examples
 --------
 
@@ -170,14 +174,14 @@ Post battery status to slack if it is less than 90:
 Example cron entry:
 
 ```
-*/5 * * * * /home/user/bin/ups_check.sh
+*/15 * * * * /home/user/bin/ups_check.sh
 ```
 
 Example script:
 
 ```
 #!/usr/bin/bash
-/home/sysadmin/bin/uwu.sh --action slackalert --param battery.charge --value 100 --location "Workshop" --options verbose
+/home/user/bin/uwu.sh --action slackalert --param battery.charge --value 100 --location "Workshop" --options verbose
 ```
 
 Usage Information
