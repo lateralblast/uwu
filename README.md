@@ -8,7 +8,7 @@ Ubuntu Working/Monitoring UPS
 Version
 -------
 
-Current version: 0.1.9
+Current version: 0.2.0
 
 Introduction
 ------------
@@ -29,7 +29,7 @@ Installing on Ubuntu:
 
 ```
 sudo apt update
-sudo apt install -y nut nut-server nut-client
+sudo apt install nut nut-server nut-client
 ```
 
 You can search for USB based UPSes, using a number of methods. using the nut-scanner tool, or lsusb.
@@ -67,7 +67,7 @@ This is done by adding/changing the MODE entry in /etc/nut/nut.conf:
 MODE=standalone
 ```
 
-Reboot for changes to take effect
+Reboot for changes to take effect.
 
 This can be tested by using upsc manually:
 

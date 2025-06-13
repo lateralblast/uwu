@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.1.9
+# Version:      0.2.0
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -462,7 +462,11 @@ check_ups_status () {
   if [ "${result}" = "true" ]; then
     message="OK ${ups['param']} is ${string} ${ups['value']}"
   else
-    message="ERROR ${ups['param']} is not ${string} ${ups['value']}"
+    if [ "${options['equal']}" = "true" ]; then
+      message="ERROR ${ups['param']} is not ${string} ${ups['value']}"
+    else
+      message="ERROR ${ups['param']} is ${string} ${ups['value']}"
+    fi
     if [ "${script['endpoint']}" = "slack" ]; then
       populate_slack_message
       slack['message']="${slack['message']} ${message}"
