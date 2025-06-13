@@ -83,6 +83,13 @@ The script currently supports outputing to the console (default), or using slack
 The slack webhook can be imbedded in the script, input from the commmand line,
 or from a file ($HOME/.uwu/slackwebhook).
 
+Example web hook file:
+
+```
+$ cat ~/.uwu/slackwebhook
+https://hooks.slack.com/services/XXXXXX/XXXXXX/XXXXXXXXX
+```
+
 Examples
 --------
 
