@@ -92,7 +92,7 @@ https://hooks.slack.com/services/XXXXXX/XXXXXX/XXXXXXXXX
 
 Example slack message:
 
-![Slack Message](https://raw.githubusercontent.com/lateralblast/uwu/master/slack.png)
+![Slack Message](slack.png)
 
 Examples
 --------
