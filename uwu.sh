@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.2.1
+# Version:      0.2.2
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -548,6 +548,20 @@ get_ups_name () {
     command="grep '^\[' ${ups['conf']} |tr -cd '[:alnum:]'" 
     execute_command "$command" "su"
     ups['name']="${script['output']}"
+  fi
+}
+
+# Function: get_ups_info
+#
+# Get UPS info
+
+get_ups_info () {
+  get_ups_name
+  command="upsc ${ups['name']} 2> /dev/null"
+  execute_command "$command" "su"
+  ups['info']="${script['output']}"
+  if [ "${options['print']}" = "true" ]; then
+    print_message "${ups['info']}" "verbose" 
   fi
 }
 
