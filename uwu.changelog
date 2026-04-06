@@ -38,3 +38,5 @@
 # Fixed logic on value checks
 # 0.2.0: Wed 16 Apr 2025 12:50:36 AEST
 # Fixed message
+# 0.2.1: Mon  6 Apr 2026 11:09:28 AEST
+# Added retry logic if UPS status returns nothing

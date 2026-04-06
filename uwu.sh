@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.2.0
+# Version:      0.2.1
 # Release:      1
 # License:      CC-BA (Creative Commons By Attribution)
 #               http://creativecommons.org/licenses/by/4.0/legalcode
@@ -560,6 +560,10 @@ get_ups_status () {
   command="upsc ${ups['name']} ${ups['param']} 2> /dev/null"
   execute_command "$command" "nodryrun"
   ups['status']="${script['output']}"
+  if [ -z "${ups['status']}" ]; then
+    sleep 5
+    ups['status']="${script['output']}"
+  fi
   if [ "${options['print']}" = "true" ]; then
     print_message "${ups['status']}" "verbose" 
   fi
