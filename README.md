@@ -8,7 +8,7 @@ Ubuntu/UNIX Working/Monitoring UPS
 Version
 -------
 
-Current version: 0.2.2
+Current version: 0.2.3
 
 Introduction
 ------------

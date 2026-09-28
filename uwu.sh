@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # Name:         uwu (Ubuntu Working/Monitoring UPS)
-# Version:      0.2.2
+# Version:      0.2.3
 # Release:      1
-# License:      CC-BA (Creative Commons By Attribution)
-#               http://creativecommons.org/licenses/by/4.0/legalcode
+# License:      CC BY-NC-SA 4.0 (Creative Commons Attribution-NonCommercial-ShareAlike 4.0)
+#               https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 # Group:        System
 # Source:       N/A
 # URL:          https://github.com/lateralblast/uwu
@@ -240,7 +240,7 @@ execute_command () {
     print_message "${command}" "execute"
   fi
   if [ "${options['dryrun']}" = "false" ] || [[ "${privilege}" =~ nodryrun ]]; then
-    script['output']=$( eval ${command} )
+    script['output']=$( eval "${command}" )
   fi
   privilege=""
 }
@@ -256,14 +256,14 @@ print_info () {
   echo ""
   echo "${info}(s):"
   echo "---------"
-  while read line; do
+  while read -r line; do
     if [[ "${line}" =~ .*"# ${info}".* ]]; then
       if [[ "${info}" =~ option ]]; then
         IFS='-' read -r param desc <<< "${line}"
-        IFS=']' read -r param default <<< ${param}
-        IFS='[' read -r _ param <<< ${param}
+        IFS=']' read -r param default <<< "${param}"
+        IFS='[' read -r _ param <<< "${param}"
         param="${param//\'/}"
-        IFS='=' read -r _ default <<< ${default}
+        IFS='=' read -r _ default <<< "${default}"
         default="${default//\'/}"
         default="${default// /}"
         param="${param} (default = ${default})"
@@ -440,18 +440,18 @@ check_ups_status () {
   fi
   if [ "${options['less']}" = "true" ]; then
     print_message "${ups['value']} is less than ${ups['status']}" "test"
-    if [ ${ups['value']} -lt ${ups['status']} ]; then
-      string="greater than"
+    if [ "${ups['value']}" -lt "${ups['status']}" ]; then
+      string="less than"
       result="true"
     else
-      string="less than"
+      string="greater than"
       result="false"
     fi
   fi
   if [ "${options['greater']}" = "true" ]; then
     string="greater than"
     print_message "${ups['value']} is greater than ${ups['status']}" "test"
-    if [ ${ups['value']} -gt ${ups['status']} ]; then
+    if [ "${ups['value']}" -gt "${ups['status']}" ]; then
       string="greater than"
       result="true"
     else
@@ -546,7 +546,7 @@ install_package () {
 get_ups_name () {
   if [ "${ups['name']}" = "" ]; then
     command="grep '^\[' ${ups['conf']} |tr -cd '[:alnum:]'" 
-    execute_command "$command" "su"
+    execute_command "${command}" "su"
     ups['name']="${script['output']}"
   fi
 }
@@ -558,7 +558,7 @@ get_ups_name () {
 get_ups_info () {
   get_ups_name
   command="upsc ${ups['name']} 2> /dev/null"
-  execute_command "$command" "su"
+  execute_command "${command}" "nodryrun"
   ups['info']="${script['output']}"
   if [ "${options['print']}" = "true" ]; then
     print_message "${ups['info']}" "verbose" 
@@ -572,10 +572,11 @@ get_ups_info () {
 get_ups_status () {
   get_ups_name
   command="upsc ${ups['name']} ${ups['param']} 2> /dev/null"
-  execute_command "$command" "nodryrun"
+  execute_command "${command}" "nodryrun"
   ups['status']="${script['output']}"
   if [ -z "${ups['status']}" ]; then
     sleep 5
+    execute_command "${command}" "nodryrun"
     ups['status']="${script['output']}"
   fi
   if [ "${options['print']}" = "true" ]; then
@@ -588,7 +589,8 @@ get_ups_status () {
 # Add UPS
 
 add_ups () {
-  get_ups
+  command="printf '[%s]\n  driver = %s\n  port = %s\n  productid = %s\n  desc = \"%s\"\n' '${ups['name']}' '${ups['driver']}' '${ups['port']}' '${ups['productid']}' '${ups['desc']}' >> ${ups['conf']}"
+  execute_command "${command}" "su"
 }
 
 # Function: set_mode
@@ -655,8 +657,8 @@ process_actions () {
     addups)                         # action - Add UPS
       add_ups
       ;;
-    alertstatus|checkstatus)        # action - Get UPS info
-      check_ups_status 
+    alertstatus|checkstatus)        # action - Check UPS status against a value
+      check_ups_status
       ;;
     checkenv*)                      # action - Check environment
       check_environment
@@ -690,8 +692,8 @@ process_actions () {
       print_version
       exit
       ;;
-    postalertstatus)                # action - Get UPS info
-      check_ups_status 
+    postalertstatus)                # action - Check UPS status against a value and post the result
+      check_ups_status
       ;;
     postupsstatus|poststatus)       # action - Post UPS status
       post_ups_status 
@@ -761,7 +763,7 @@ while test $# -gt 0; do
       ;;
     --equal*)                          # switch - Equal to check
       options['less']="false"
-      options['greater']="fale"
+      options['greater']="false"
       options['equal']="true"
       shift
       ;;
@@ -770,9 +772,8 @@ while test $# -gt 0; do
       shift
       ;;
     --greater*)                        # switch - Greater than check
-      echo "got here"
       options['equal']="false"
-      options['less']="fale"
+      options['less']="false"
       options['greater']="true"
       shift
       ;;
@@ -891,7 +892,7 @@ if [ "${options['options']}" = "true" ]; then
       process_options "${option_flag}"
     fi
   done
-  if [ "$options['equal']" = "false" ] && [ "$options['less']" = "false" ] && [ "$options['greater']" = "false" ]; then
+  if [ "${options['equal']}" = "false" ] && [ "${options['less']}" = "false" ] && [ "${options['greater']}" = "false" ]; then
     options['equal']="true"
   fi
 fi
