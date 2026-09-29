@@ -28,7 +28,9 @@ CC BY-NC-SA: https://creativecommons.org/licenses/by-nc-sa/4.0/
 Help Support Development
 ------------------------
 
-Fund me here: https://ko-fi.com/richardatlateralblast
+If you find this software useful and would like to support its development, please consider buying me a coffee:
+
+https://ko-fi.com/richardatlateralblast
 
 Requirements
 ------------
