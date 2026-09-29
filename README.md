@@ -20,6 +20,11 @@ and wanting something more lightweight than a fully configured nut installation.
 It uses the the uspc command from the NUT package to get values from the UPS and act on then.
 It can be run from cron or similar to check the status, e.g. every 5 or 10mins.
 
+Help Support Development
+------------------------
+
+Fund me here: https://ko-fi.com/richardatlateralblast
+
 Requirements
 ------------
 
